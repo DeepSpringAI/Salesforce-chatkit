@@ -6,6 +6,7 @@ This document explains the changes made to resolve the "COEP/CORP Error: ChatKit
 
 1. The ChatKit iframe was being blocked due to missing or incorrect Cross-Origin Embedder Policy (COEP) and Cross-Origin Resource Policy (CORP) headers.
 2. The ChatKit script was failing to load due to overly restrictive Content Security Policy (CSP) headers.
+3. The sentinel frame (`https://sentinel.openai.com/backend-api/sentinel/frame.html`) was failing to load due to CSP restrictions.
 
 ## Solution
 
@@ -18,8 +19,8 @@ Created a Next.js middleware file that sets the required headers for all request
 - `Access-Control-Allow-Origin: *`
 - `Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS`
 - `Access-Control-Allow-Headers: Content-Type, Authorization`
-- `Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.platform.openai.com https://*.openai.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.openai.com https://*.openai.com; frame-ancestors 'self' https://*.openai.com https://*.platform.openai.com; frame-src 'self' https://*.openai.com https://*.platform.openai.com;`
-- `X-Frame-Options: SAMEORIGIN`
+- `Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.platform.openai.com https://*.openai.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.openai.com https://*.openai.com https://sentinel.openai.com; frame-ancestors 'self' https://*.openai.com https://*.platform.openai.com; frame-src 'self' https://*.openai.com https://*.platform.openai.com https://sentinel.openai.com;`
+- Removed `X-Frame-Options` to allow iframe embedding (CSP frame-src handles this)
 
 ### 2. Next.js Configuration (`next.config.ts`)
 
@@ -36,7 +37,7 @@ Updated the API route to include proper CORS headers in all responses:
 
 ### 4. Test Page (`public/test-chatkit.html`)
 
-Created a simple test page to verify ChatKit script loading works correctly.
+Created a simple test page to verify ChatKit script loading and sentinel frame loading works correctly.
 
 ## Testing
 
@@ -58,8 +59,8 @@ node test-headers.js http://localhost:3000
 - **COEP (Cross-Origin Embedder Policy)**: Changed to `unsafe-none` to allow ChatKit script loading
 - **CORP (Cross-Origin Resource Policy)**: Specifies which resources can be loaded by the page from external origins
 - **CORS Headers**: Allow cross-origin requests from browsers
-- **CSP (Content Security Policy)**: Updated to allow ChatKit script loading from `cdn.platform.openai.com`
-- **X-Frame-Options**: Additional protection against clickjacking
+- **CSP (Content Security Policy)**: Updated to allow ChatKit script loading from `cdn.platform.openai.com` and sentinel frame from `sentinel.openai.com`
+- **X-Frame-Options**: Removed to allow iframe embedding (CSP frame-src handles this)
 
 ## Security Considerations
 

@@ -19,11 +19,38 @@
                 statusDiv.innerHTML = '✅ ChatKit is loaded successfully!';
                 statusDiv.style.color = 'green';
                 console.log('ChatKit object:', window.ChatKit);
+                
+                // Test sentinel frame loading
+                testSentinelFrame();
             } else {
                 statusDiv.innerHTML = '❌ ChatKit failed to load';
                 statusDiv.style.color = 'red';
                 console.error('ChatKit not available');
             }
+        }
+        
+        // Test sentinel frame loading
+        function testSentinelFrame() {
+            const sentinelUrl = 'https://sentinel.openai.com/backend-api/sentinel/frame.html';
+            console.log('Testing sentinel frame:', sentinelUrl);
+            
+            // Try to create an iframe to test sentinel frame loading
+            const iframe = document.createElement('iframe');
+            iframe.src = sentinelUrl;
+            iframe.style.display = 'none';
+            iframe.onload = function() {
+                console.log('✅ Sentinel frame loaded successfully');
+            };
+            iframe.onerror = function() {
+                console.error('❌ Sentinel frame failed to load');
+            };
+            
+            document.body.appendChild(iframe);
+            
+            // Remove iframe after test
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+            }, 3000);
         }
         
         // Check after a short delay to allow script to load

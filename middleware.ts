@@ -19,11 +19,11 @@ export function middleware(request: NextRequest) {
   // Set Content Security Policy to allow iframe embedding and ChatKit script loading
   response.headers.set(
     'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.platform.openai.com https://*.openai.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.openai.com https://*.openai.com; frame-ancestors 'self' https://*.openai.com https://*.platform.openai.com; frame-src 'self' https://*.openai.com https://*.platform.openai.com;"
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.platform.openai.com https://*.openai.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.openai.com https://*.openai.com https://sentinel.openai.com; frame-ancestors 'self' https://*.openai.com https://*.platform.openai.com; frame-src 'self' https://*.openai.com https://*.platform.openai.com https://sentinel.openai.com;"
   )
 
-  // Set X-Frame-Options to allow embedding
-  response.headers.set('X-Frame-Options', 'SAMEORIGIN')
+  // Remove X-Frame-Options to allow iframe embedding (CSP frame-src handles this)
+  // response.headers.set('X-Frame-Options', 'SAMEORIGIN')
 
   return response
 }
