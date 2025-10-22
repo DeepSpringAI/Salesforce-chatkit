@@ -31,26 +31,57 @@
         
         // Test sentinel frame loading
         function testSentinelFrame() {
-            const sentinelUrl = 'https://sentinel.openai.com/backend-api/sentinel/frame.html';
-            console.log('Testing sentinel frame:', sentinelUrl);
+            const sentinelUrls = [
+                'https://sentinel.openai.com/backend-api/sentinel/frame.html',
+                'https://sentinel.openai.com/cdn-cgi/challenge-platform/scripts/jsd/main.js',
+                'https://sentinel.openai.com/backend-api/sentinel/req'
+            ];
             
-            // Try to create an iframe to test sentinel frame loading
-            const iframe = document.createElement('iframe');
-            iframe.src = sentinelUrl;
-            iframe.style.display = 'none';
-            iframe.onload = function() {
-                console.log('✅ Sentinel frame loaded successfully');
-            };
-            iframe.onerror = function() {
-                console.error('❌ Sentinel frame failed to load');
-            };
+            console.log('Testing sentinel endpoints...');
             
-            document.body.appendChild(iframe);
-            
-            // Remove iframe after test
-            setTimeout(() => {
-                document.body.removeChild(iframe);
-            }, 3000);
+            sentinelUrls.forEach((url, index) => {
+                console.log(`Testing ${index + 1}: ${url}`);
+                
+                // Test script loading for JS files
+                if (url.includes('.js')) {
+                    const script = document.createElement('script');
+                    script.src = url;
+                    script.onload = function() {
+                        console.log(`✅ Script loaded successfully: ${url}`);
+                    };
+                    script.onerror = function() {
+                        console.error(`❌ Script failed to load: ${url}`);
+                    };
+                    document.head.appendChild(script);
+                    
+                    // Remove script after test
+                    setTimeout(() => {
+                        if (document.head.contains(script)) {
+                            document.head.removeChild(script);
+                        }
+                    }, 3000);
+                } else {
+                    // Test iframe loading for HTML files
+                    const iframe = document.createElement('iframe');
+                    iframe.src = url;
+                    iframe.style.display = 'none';
+                    iframe.onload = function() {
+                        console.log(`✅ Frame loaded successfully: ${url}`);
+                    };
+                    iframe.onerror = function() {
+                        console.error(`❌ Frame failed to load: ${url}`);
+                    };
+                    
+                    document.body.appendChild(iframe);
+                    
+                    // Remove iframe after test
+                    setTimeout(() => {
+                        if (document.body.contains(iframe)) {
+                            document.body.removeChild(iframe);
+                        }
+                    }, 3000);
+                }
+            });
         }
         
         // Check after a short delay to allow script to load

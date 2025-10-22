@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentinel Endpoints Test</title>
+</head>
+<body>
+    <h1>Sentinel Endpoints Loading Test</h1>
+    <div id="status">Testing sentinel endpoints...</div>
+    <div id="results"></div>
+    
+    <script>
+        const resultsDiv = document.getElementById('results');
+        const statusDiv = document.getElementById('status');
+        
+        const endpoints = [
+            {
+                url: 'https://sentinel.openai.com/backend-api/sentinel/frame.html',
+                type: 'iframe',
+                description: 'Sentinel Frame'
+            },
+            {
+                url: 'https://sentinel.openai.com/cdn-cgi/challenge-platform/scripts/jsd/main.js',
+                type: 'script',
+                description: 'Cloudflare Challenge Script'
+            },
+            {
+                url: 'https://sentinel.openai.com/backend-api/sentinel/req',
+                type: 'fetch',
+                description: 'Sentinel API Request'
+            }
+        ];
+        
+        function addResult(message, isSuccess = true) {
+            const div = document.createElement('div');
+            div.style.color = isSuccess ? 'green' : 'red';
+            div.style.margin = '5px 0';
+            div.textContent = message;
+            resultsDiv.appendChild(div);
+        }
+        
+        function testEndpoint(endpoint) {
+            addResult(`Testing ${endpoint.description}: ${endpoint.url}`);
+            
+            if (endpoint.type === 'script') {
+                const script = document.createElement('script');
+                script.src = endpoint.url;
+                script.onload = function() {
+                    addResult(`✅ ${endpoint.description} loaded successfully`);
+                };
+                script.onerror = function() {
+                    addResult(`❌ ${endpoint.description} failed to load`, false);
+                };
+                document.head.appendChild(script);
+                
+                setTimeout(() => {
+                    if (document.head.contains(script)) {
+                        document.head.removeChild(script);
+                    }
+                }, 2000);
+                
+            } else if (endpoint.type === 'iframe') {
+                const iframe = document.createElement('iframe');
+                iframe.src = endpoint.url;
+                iframe.style.display = 'none';
+                iframe.onload = function() {
+                    addResult(`✅ ${endpoint.description} loaded successfully`);
+                };
+                iframe.onerror = function() {
+                    addResult(`❌ ${endpoint.description} failed to load`, false);
+                };
+                
+                document.body.appendChild(iframe);
+                
+                setTimeout(() => {
+                    if (document.body.contains(iframe)) {
+                        document.body.removeChild(iframe);
+                    }
+                }, 2000);
+                
+            } else if (endpoint.type === 'fetch') {
+                fetch(endpoint.url, {
+                    method: 'GET',
+                    mode: 'cors'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        addResult(`✅ ${endpoint.description} request successful (${response.status})`);
+                    } else {
+                        addResult(`⚠️ ${endpoint.description} request returned ${response.status}`, false);
+                    }
+                })
+                .catch(error => {
+                    addResult(`❌ ${endpoint.description} request failed: ${error.message}`, false);
+                });
+            }
+        }
+        
+        function runTests() {
+            statusDiv.textContent = 'Running tests...';
+            resultsDiv.innerHTML = '';
+            
+            endpoints.forEach((endpoint, index) => {
+                setTimeout(() => {
+                    testEndpoint(endpoint);
+                }, index * 1000);
+            });
+            
+            setTimeout(() => {
+                statusDiv.textContent = 'Tests completed. Check results above.';
+            }, endpoints.length * 1000 + 2000);
+        }
+        
+        // Start tests when page loads
+        window.addEventListener('load', runTests);
+    </script>
+</body>
+</html>
