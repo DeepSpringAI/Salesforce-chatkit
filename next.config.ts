@@ -7,6 +7,13 @@ const nextConfig: NextConfig = {
     };
     return config;
   },
+  // Configure allowed development origins for cross-origin requests
+  allowedDevOrigins: [
+    'https://salesforce-chatkit.deepspring.co',
+    'https://*.deepspring.co',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000'
+  ],
   // Configure headers for COEP/CORP support
   async headers() {
     return [

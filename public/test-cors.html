@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cross-Origin Request Test</title>
+</head>
+<body>
+    <h1>Cross-Origin Request Test</h1>
+    <div id="status">Testing cross-origin requests...</div>
+    <div id="results"></div>
+    
+    <script>
+        const resultsDiv = document.getElementById('results');
+        const statusDiv = document.getElementById('status');
+        
+        function addResult(message, isSuccess = true) {
+            const div = document.createElement('div');
+            div.style.color = isSuccess ? 'green' : 'red';
+            div.style.margin = '5px 0';
+            div.style.padding = '5px';
+            div.style.border = '1px solid ' + (isSuccess ? 'green' : 'red');
+            div.style.borderRadius = '3px';
+            div.textContent = message;
+            resultsDiv.appendChild(div);
+        }
+        
+        function testCrossOriginRequests() {
+            addResult('Testing cross-origin requests to Next.js resources...');
+            
+            // Test various Next.js resources that might be requested cross-origin
+            const testUrls = [
+                '/_next/static/chunks/main.js',
+                '/_next/static/chunks/webpack.js',
+                '/_next/static/css/app.css',
+                '/api/create-session',
+                '/api/config'
+            ];
+            
+            testUrls.forEach((url, index) => {
+                setTimeout(() => {
+                    addResult(`Testing: ${url}`);
+                    
+                    fetch(url, {
+                        method: 'GET',
+                        mode: 'cors',
+                        credentials: 'include'
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            addResult(`✅ ${url} - Request successful (${response.status})`);
+                        } else if (response.status === 404) {
+                            addResult(`⚠️ ${url} - Not found (${response.status}) - but CORS allowed`);
+                        } else {
+                            addResult(`⚠️ ${url} - Response: ${response.status}`);
+                        }
+                    })
+                    .catch(error => {
+                        if (error.message.includes('CORS') || error.message.includes('Cross-Origin')) {
+                            addResult(`❌ ${url} - CORS blocked: ${error.message}`, false);
+                        } else {
+                            addResult(`❌ ${url} - Error: ${error.message}`, false);
+                        }
+                    });
+                }, index * 500);
+            });
+            
+            setTimeout(() => {
+                statusDiv.textContent = 'Cross-origin request tests completed.';
+                addResult('Note: 404 errors are expected for non-existent resources, but CORS should allow the requests.');
+            }, testUrls.length * 500 + 1000);
+        }
+        
+        // Start tests when page loads
+        window.addEventListener('load', testCrossOriginRequests);
+    </script>
+</body>
+</html>

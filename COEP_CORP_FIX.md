@@ -10,6 +10,7 @@ This document explains the changes made to resolve the "COEP/CORP Error: ChatKit
 4. Cloudflare challenge scripts (`https://sentinel.openai.com/cdn-cgi/challenge-platform/scripts/jsd/main.js`) were being blocked.
 5. Sentinel API requests (`https://sentinel.openai.com/backend-api/sentinel/req`) were failing due to CSP restrictions.
 6. ChatKit conversation API (`https://api.openai.com/v1/chatkit/conversation`) was being blocked by CSP connect-src restrictions.
+7. Cross-origin requests from `salesforce-chatkit.deepspring.co` to Next.js `/_next/*` resources were generating warnings about future security changes.
 
 ## Solution
 
@@ -27,7 +28,14 @@ Created a Next.js middleware file that sets the required headers for all request
 
 ### 2. Next.js Configuration (`next.config.ts`)
 
-Updated the Next.js configuration to include headers configuration that applies the same headers at the application level.
+Updated the Next.js configuration to include headers configuration and allowed development origins:
+
+- Added `allowedDevOrigins` configuration to explicitly allow cross-origin requests from:
+  - `https://salesforce-chatkit.deepspring.co`
+  - `https://*.deepspring.co`
+  - `http://localhost:3000`
+  - `http://127.0.0.1:3000`
+- Applied the same headers configuration at the application level
 
 ### 3. API Route Updates (`app/api/create-session/route.ts`)
 
@@ -38,9 +46,9 @@ Updated the API route to include proper CORS headers in all responses:
 - Updated error responses to include CORS headers
 - Changed COEP policy to `unsafe-none` for ChatKit compatibility
 
-### 4. Test Pages (`public/test-chatkit.html`, `public/test-sentinel.html`, and `public/test-chatkit-api.html`)
+### 4. Test Pages (`public/test-chatkit.html`, `public/test-sentinel.html`, `public/test-chatkit-api.html`, and `public/test-cors.html`)
 
-Created test pages to verify ChatKit script loading, all sentinel endpoints, and ChatKit API endpoints work correctly.
+Created test pages to verify ChatKit script loading, all sentinel endpoints, ChatKit API endpoints, and cross-origin requests work correctly.
 
 ## Testing
 
@@ -61,6 +69,9 @@ node test-headers.js http://localhost:3000
 
 # Test ChatKit API endpoints
 # Open http://localhost:3000/test-chatkit-api.html in your browser
+
+# Test cross-origin requests
+# Open http://localhost:3000/test-cors.html in your browser
 ```
 
 ## Headers Explained
@@ -89,4 +100,5 @@ The current configuration allows cross-origin access (`Access-Control-Allow-Orig
 5. `public/test-chatkit.html` - New test page for ChatKit script loading
 6. `public/test-sentinel.html` - New comprehensive test page for all sentinel endpoints
 7. `public/test-chatkit-api.html` - New test page for ChatKit API endpoints
-8. `COEP_CORP_FIX.md` - This documentation file
+8. `public/test-cors.html` - New test page for cross-origin requests
+9. `COEP_CORP_FIX.md` - This documentation file
