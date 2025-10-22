@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatKit API Test</title>
+</head>
+<body>
+    <h1>ChatKit API Endpoints Test</h1>
+    <div id="status">Testing ChatKit API endpoints...</div>
+    <div id="results"></div>
+    
+    <script>
+        const resultsDiv = document.getElementById('results');
+        const statusDiv = document.getElementById('status');
+        
+        const apiEndpoints = [
+            {
+                url: 'https://api.openai.com/v1/chatkit/conversation',
+                method: 'POST',
+                description: 'ChatKit Conversation API'
+            },
+            {
+                url: 'https://api.openai.com/v1/chatkit/sessions',
+                method: 'POST',
+                description: 'ChatKit Sessions API'
+            },
+            {
+                url: 'https://api.openai.com/v1/chatkit/workflows',
+                method: 'GET',
+                description: 'ChatKit Workflows API'
+            }
+        ];
+        
+        function addResult(message, isSuccess = true) {
+            const div = document.createElement('div');
+            div.style.color = isSuccess ? 'green' : 'red';
+            div.style.margin = '5px 0';
+            div.style.padding = '5px';
+            div.style.border = '1px solid ' + (isSuccess ? 'green' : 'red');
+            div.style.borderRadius = '3px';
+            div.textContent = message;
+            resultsDiv.appendChild(div);
+        }
+        
+        function testApiEndpoint(endpoint) {
+            addResult(`Testing ${endpoint.description}: ${endpoint.url}`);
+            
+            fetch(endpoint.url, {
+                method: endpoint.method,
+                mode: 'cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer test-token' // This will fail auth but test CSP
+                },
+                body: endpoint.method === 'POST' ? JSON.stringify({ test: true }) : undefined
+            })
+            .then(response => {
+                if (response.status === 401 || response.status === 403) {
+                    // Auth error is expected, but CSP should allow the request
+                    addResult(`✅ ${endpoint.description} - CSP allows request (got ${response.status} - auth error expected)`);
+                } else if (response.ok) {
+                    addResult(`✅ ${endpoint.description} - Request successful (${response.status})`);
+                } else {
+                    addResult(`⚠️ ${endpoint.description} - Request returned ${response.status}`);
+                }
+            })
+            .catch(error => {
+                if (error.message.includes('CSP') || error.message.includes('Content Security Policy')) {
+                    addResult(`❌ ${endpoint.description} - Blocked by CSP: ${error.message}`, false);
+                } else if (error.message.includes('CORS')) {
+                    addResult(`⚠️ ${endpoint.description} - CORS issue: ${error.message}`, false);
+                } else {
+                    addResult(`❌ ${endpoint.description} - Request failed: ${error.message}`, false);
+                }
+            });
+        }
+        
+        function runTests() {
+            statusDiv.textContent = 'Running ChatKit API tests...';
+            resultsDiv.innerHTML = '';
+            
+            apiEndpoints.forEach((endpoint, index) => {
+                setTimeout(() => {
+                    testApiEndpoint(endpoint);
+                }, index * 1000);
+            });
+            
+            setTimeout(() => {
+                statusDiv.textContent = 'ChatKit API tests completed. Check results above.';
+                addResult('Note: 401/403 errors are expected due to missing valid API keys, but CSP should allow the requests.');
+            }, apiEndpoints.length * 1000 + 2000);
+        }
+        
+        // Start tests when page loads
+        window.addEventListener('load', runTests);
+    </script>
+</body>
+</html>
