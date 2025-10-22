@@ -31,7 +31,14 @@ export async function POST(request: Request): Promise<Response> {
         }),
         {
           status: 500,
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            "Cross-Origin-Embedder-Policy": "require-corp",
+            "Cross-Origin-Resource-Policy": "cross-origin",
+          },
         }
       );
     }
@@ -139,10 +146,30 @@ export async function GET(): Promise<Response> {
   return methodNotAllowedResponse();
 }
 
+export async function OPTIONS(): Promise<Response> {
+  return new Response(null, {
+    status: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      "Cross-Origin-Embedder-Policy": "require-corp",
+      "Cross-Origin-Resource-Policy": "cross-origin",
+    },
+  });
+}
+
 function methodNotAllowedResponse(): Response {
   return new Response(JSON.stringify({ error: "Method Not Allowed" }), {
     status: 405,
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      "Cross-Origin-Embedder-Policy": "require-corp",
+      "Cross-Origin-Resource-Policy": "cross-origin",
+    },
   });
 }
 
@@ -212,6 +239,13 @@ function buildJsonResponse(
   sessionCookie: string | null
 ): Response {
   const responseHeaders = new Headers(headers);
+
+  // Add CORS and COEP/CORP headers
+  responseHeaders.set("Access-Control-Allow-Origin", "*");
+  responseHeaders.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  responseHeaders.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  responseHeaders.set("Cross-Origin-Embedder-Policy", "require-corp");
+  responseHeaders.set("Cross-Origin-Resource-Policy", "cross-origin");
 
   if (sessionCookie) {
     responseHeaders.append("Set-Cookie", sessionCookie);
