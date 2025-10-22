@@ -36,7 +36,7 @@ export async function POST(request: Request): Promise<Response> {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type, Authorization",
-            "Cross-Origin-Embedder-Policy": "require-corp",
+            "Cross-Origin-Embedder-Policy": "unsafe-none",
             "Cross-Origin-Resource-Policy": "cross-origin",
           },
         }
@@ -244,7 +244,7 @@ function buildJsonResponse(
   responseHeaders.set("Access-Control-Allow-Origin", "*");
   responseHeaders.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   responseHeaders.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  responseHeaders.set("Cross-Origin-Embedder-Policy", "require-corp");
+  responseHeaders.set("Cross-Origin-Embedder-Policy", "unsafe-none");
   responseHeaders.set("Cross-Origin-Resource-Policy", "cross-origin");
 
   if (sessionCookie) {

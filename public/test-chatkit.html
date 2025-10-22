@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatKit Script Test</title>
+    <script src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js"></script>
+</head>
+<body>
+    <h1>ChatKit Script Loading Test</h1>
+    <div id="status">Checking ChatKit availability...</div>
+    
+    <script>
+        // Test if ChatKit is available
+        function checkChatKit() {
+            const statusDiv = document.getElementById('status');
+            
+            if (typeof window.ChatKit !== 'undefined') {
+                statusDiv.innerHTML = '✅ ChatKit is loaded successfully!';
+                statusDiv.style.color = 'green';
+                console.log('ChatKit object:', window.ChatKit);
+            } else {
+                statusDiv.innerHTML = '❌ ChatKit failed to load';
+                statusDiv.style.color = 'red';
+                console.error('ChatKit not available');
+            }
+        }
+        
+        // Check after a short delay to allow script to load
+        setTimeout(checkChatKit, 1000);
+        
+        // Also check immediately
+        checkChatKit();
+    </script>
+</body>
+</html>
